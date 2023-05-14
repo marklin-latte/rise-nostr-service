@@ -8,7 +8,7 @@ import { WebSocketClient } from 'src/infrastructure/websocket-client/client';
 import * as crypto from 'crypto';
 
 @Command({
-  name: 'send',
+  name: 'event',
   arguments: '<message>',
   description: 'Send nostr event to replay',
 })

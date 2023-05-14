@@ -6,9 +6,10 @@ import {
 } from '@nestjs/websockets';
 import { Server, WebSocket } from 'ws';
 import { ReplayEvents } from '../constant/event.constant';
+import * as crypto from 'crypto';
 
-@WebSocketGateway(8080)
-export class ReplayGateway implements OnGatewayConnection, OnGatewayDisconnect {
+@WebSocketGateway()
+export class RelayGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer()
   server: Server;
 
@@ -24,11 +25,15 @@ export class ReplayGateway implements OnGatewayConnection, OnGatewayDisconnect {
     console.log('onGatewayDisconnect');
   }
 
+  /**
+   * ref: https://github.com/nostr-protocol/nips/blob/master/01.md
+   * ref: https://github.com/nostr-protocol/nips/blob/master/11.md
+   */
   [ReplayEvents.EVENT](client: any, data: any): void {
-    console.log(data);
     client.send('EVENT_ACK');
   }
 
+  // used to request events for receiving events from other clients
   [ReplayEvents.REQ](client: any, data: any): void {
     console.log(data);
   }

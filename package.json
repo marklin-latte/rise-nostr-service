@@ -27,6 +27,8 @@
     "@nestjs/core": "^9.0.0",
     "@nestjs/microservices": "^9.4.0",
     "@nestjs/platform-express": "^9.0.0",
+    "@nestjs/platform-ws": "^9.4.0",
+    "@nestjs/websockets": "^9.4.0",
     "crypto": "^1.0.1",
     "nest-commander": "^3.7.0",
     "reflect-metadata": "^0.1.13",

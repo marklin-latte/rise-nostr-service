@@ -24,6 +24,10 @@ class WebSocketClient implements OnModuleInit {
     this.wsClient = new WebSocket(relayWebsocketUrl, {
       perMessageDeflate: false,
     });
+    this.wsClient.on('message', (message) => {
+      console.log('Received:', message.toString());
+    });
+
     await this.waitForConnection();
   }
 

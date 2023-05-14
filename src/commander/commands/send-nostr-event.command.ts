@@ -57,12 +57,23 @@ export class SendNostrEventCommand extends CommandRunner {
       .digest();
     payload.sig = crypto
       .sign(
-        'sha256',
+        null,
         sha256Hash,
-        this.configService.get<string>('nostrPrivateKey'),
+        toPkcs8der(this.configService.get<string>('nostrPrivateKey')),
       )
       .toString('hex', 0, 128);
 
-    await this.client.send(JSON.stringify(['EVENT', JSON.stringify(payload)]));
+    await this.client.send(JSON.stringify(['EVENT', payload]));
   }
 }
+
+// Ref: https://stackoverflow.com/questions/71916954/crypto-sign-function-to-sign-a-message-with-given-private-key
+const toPkcs8der = (rawB64) => {
+  const rawPrivate = Buffer.from(rawB64, 'base64').subarray(0, 32);
+  const prefixPrivateEd25519 = Buffer.from(
+    '302e020100300506032b657004220420',
+    'hex',
+  );
+  const der = Buffer.concat([prefixPrivateEd25519, rawPrivate]);
+  return crypto.createPrivateKey({ key: der, format: 'der', type: 'pkcs8' });
+};

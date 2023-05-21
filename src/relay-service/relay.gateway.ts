@@ -7,9 +7,19 @@ import {
 import { Server, WebSocket } from 'ws';
 import { ReplayEvents } from '../constant/event.constant';
 import * as crypto from 'crypto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Event } from '../entity/event.entity';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 @WebSocketGateway()
 export class RelayGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  constructor(
+    @InjectRepository(Event)
+    private eventsRepository: Repository<Event>,
+  ) {}
+
   @WebSocketServer()
   server: Server;
 
@@ -29,7 +39,15 @@ export class RelayGateway implements OnGatewayConnection, OnGatewayDisconnect {
    * ref: https://github.com/nostr-protocol/nips/blob/master/01.md
    * ref: https://github.com/nostr-protocol/nips/blob/master/11.md
    */
-  [ReplayEvents.EVENT](client: any, data: any): void {
+  async [ReplayEvents.EVENT](client: any, data: any): Promise<void> {
+    const event = new Event();
+    event.payload = data;
+    try {
+      const result = await this.eventsRepository.save(event);
+      console.log(result);
+    } catch (error) {
+      console.log(error);
+    }
     client.send('EVENT_ACK');
   }
 

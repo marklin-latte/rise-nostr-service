@@ -4,8 +4,7 @@ import { Logger, Inject, createParamDecorator } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Command, CommandRunner } from 'nest-commander';
 import { WebSocketClient } from 'src/infrastructure/websocket-client/client';
-import * as crypto from 'crypto';
-import { ReplayEvents } from 'src/constant/event.constant';
+import { RelayEvents } from 'src/constant/event.constant';
 
 @Command({
   name: 'close',
@@ -25,8 +24,6 @@ export class SendNostrCloseCommand extends CommandRunner {
 
   async run(inputs: string[]): Promise<void> {
     const subscriptionId = inputs[0];
-    await this.client.send(
-      JSON.stringify([ReplayEvents.CLOSE, subscriptionId]),
-    );
+    await this.client.send(JSON.stringify([RelayEvents.CLOSE, subscriptionId]));
   }
 }

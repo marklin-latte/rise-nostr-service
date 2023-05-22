@@ -1,4 +1,4 @@
-export const ReplayEvents = {
+export const RelayEvents = {
   EVENT: 'EVENT',
   REQ: 'REQ',
   CLOSE: 'CLOSE',

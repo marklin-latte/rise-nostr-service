@@ -1,9 +1,8 @@
 import { Module } from '@nestjs/common';
 import { RelayGateway } from './relay.gateway';
-import { TypeOrmModule, getRepositoryToken } from '@nestjs/typeorm';
-import { Event } from '../entity/event.entity';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { Event } from '../../entity/event.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { Repository } from 'typeorm';
 import configuration from 'src/config/configuration';
 
 @Module({

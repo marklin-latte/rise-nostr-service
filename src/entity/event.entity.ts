@@ -6,7 +6,12 @@ export class Event {
   id: number;
 
   @Column({
+    type: 'varchar',
+  })
+  payload: string;
+
+  @Column({
     type: 'jsonb',
   })
-  payload: object;
+  relay: object;
 }

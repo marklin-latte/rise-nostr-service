@@ -5,16 +5,17 @@ import {
   OnGatewayDisconnect,
 } from '@nestjs/websockets';
 import { Server, WebSocket } from 'ws';
-import { RelayEvents } from '../constant/event.constant';
+import { RelayEvents } from '../../constant/event.constant';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Event } from '../entity/event.entity';
-import { Injectable } from '@nestjs/common';
-import { validateEvent } from 'nostr-tools';
+import { Event } from '../../entity/event.entity';
+import { Injectable, Logger } from '@nestjs/common';
 
 @Injectable()
 @WebSocketGateway()
 export class RelayGateway implements OnGatewayConnection, OnGatewayDisconnect {
+  logger: Logger = new Logger(RelayGateway.name);
+
   private subscriptionClients: WebSocket[] = [];
   constructor(
     @InjectRepository(Event)
@@ -29,11 +30,11 @@ export class RelayGateway implements OnGatewayConnection, OnGatewayDisconnect {
       const messages = JSON.parse(message.toString());
       this[messages[0]](ws, messages);
     });
-    console.log('onGatewayConnection');
+    this.logger.log('New client connected');
   }
 
   handleDisconnect() {
-    console.log('onGatewayDisconnect');
+    this.logger.log('Client disconnected');
   }
 
   /**
@@ -42,23 +43,26 @@ export class RelayGateway implements OnGatewayConnection, OnGatewayDisconnect {
    */
   async [RelayEvents.EVENT](client: any, messages: any): Promise<void> {
     const eventData = messages[1];
-    if (!validateEvent(eventData)) {
-      throw new Error('Invalid event');
-    }
     const event = new Event();
     event.payload = eventData;
-    try {
-      const result = await this.eventsRepository.save(event);
-      console.log(result);
-    } catch (error) {
-      console.log(error);
-    }
     client.send('EVENT_ACK');
+    this.logger.log(`Received event from client`);
+
+    for (const subscription of this.subscriptionClients) {
+      this.logger.log(
+        `Sending event to client to ${subscription.subscriptionId}}`,
+      );
+      await subscription.client.send(JSON.stringify(['EVENT', eventData]));
+    }
   }
 
   [RelayEvents.REQ](client: any, messages: any): void {
+    this.logger.log(`Received REQ from client`);
     const subscriptionId = messages[1];
-    this.subscriptionClients[subscriptionId] = client;
+    this.subscriptionClients.push({
+      subscriptionId,
+      client,
+    });
   }
 
   [RelayEvents.CLOSE](client: any, message: any): void {

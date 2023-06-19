@@ -1,32 +1,17 @@
-import {
-  BadRequestException,
-  Inject,
-  OnModuleInit,
-  Injectable,
-  Logger,
-} from '@nestjs/common';
-import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
 import { WebSocket } from 'ws';
 
 export { WebSocketClient };
 
-@Injectable()
-class WebSocketClient implements OnModuleInit {
+class WebSocketClient {
   private readonly logger = new Logger(WebSocketClient.name);
 
-  @Inject(ConfigService)
-  private configService: ConfigService;
   private wsClient: WebSocket;
-
-  async onModuleInit(): Promise<void> {
-    const relayWebsocketUrl =
-      this.configService.get<string>('relayWebsocketUrl');
-    this.wsClient = new WebSocket(relayWebsocketUrl, {
+  async init(wsUrl: string, onMessage: (message: string) => void) {
+    this.wsClient = new WebSocket(wsUrl, {
       perMessageDeflate: false,
     });
-    this.wsClient.on('message', (message) => {
-      console.log('Received:', message.toString());
-    });
+    this.wsClient.on('message', onMessage);
 
     await this.waitForConnection();
   }

@@ -1,6 +1,20 @@
 ## Description
 
-This is a 
+The architecture of the DISTRISE
+
+![](./images//rise.drawio.png)
+
+
+### Process
+
+![](./images//rise-Page-2.drawio.png)
+
+1. The event aggregator service send the req(NIP-01) to relay service.
+2. The client send a message event(NIP-01) to the relay service.
+3. The relay service receive the message event(NIP-01) and send it to the event aggregator service through the websocket.
+4. The event aggregator service receive the message event(NIP-01) and send it to the kafka(queue service).
+5. The kafka(queue service) consume the message event(NIP-01) and save it to the cockroachdb(database service).
+
 
 ## Installation
 

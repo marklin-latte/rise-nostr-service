@@ -16,14 +16,18 @@ export class SendNostrReqCommand extends CommandRunner {
   @Inject(ConfigService)
   private configService: ConfigService;
 
-  @Inject(WebSocketClient)
-  private client: WebSocketClient;
   constructor() {
     super();
   }
 
   async run(inputs: string[]): Promise<void> {
     const subscriptionId = inputs[0];
-    await this.client.send(JSON.stringify([RelayEvents.REQ, subscriptionId]));
+    const client = new WebSocketClient();
+    const relayWebsocketUrl =
+      this.configService.get<string>('relayWebsocketUrl');
+    await client.init(relayWebsocketUrl, (message) =>
+      console.log(message.toString()),
+    );
+    await client.send(JSON.stringify([RelayEvents.REQ, subscriptionId]));
   }
 }

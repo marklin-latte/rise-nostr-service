@@ -16,14 +16,19 @@ export class SendNostrCloseCommand extends CommandRunner {
   @Inject(ConfigService)
   private configService: ConfigService;
 
-  @Inject(WebSocketClient)
-  private client: WebSocketClient;
   constructor() {
     super();
   }
 
   async run(inputs: string[]): Promise<void> {
     const subscriptionId = inputs[0];
-    await this.client.send(JSON.stringify([RelayEvents.CLOSE, subscriptionId]));
+    const relayWebsocketUrl =
+      this.configService.get<string>('relayWebsocketUrl');
+
+    const client = new WebSocketClient();
+    await client.init(relayWebsocketUrl, (message) => {
+      console.log('Received:', message.toString());
+    });
+    await client.send(JSON.stringify([RelayEvents.CLOSE, subscriptionId]));
   }
 }

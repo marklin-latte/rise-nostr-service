@@ -17,8 +17,6 @@ export class SendNostrEventCommand extends CommandRunner {
   @Inject(ConfigService)
   private configService: ConfigService;
 
-  @Inject(WebSocketClient)
-  private client: WebSocketClient;
   constructor() {
     super();
   }
@@ -63,7 +61,13 @@ export class SendNostrEventCommand extends CommandRunner {
       )
       .toString('hex', 0, 128);
 
-    await this.client.send(JSON.stringify(['EVENT', payload]));
+    const client = new WebSocketClient();
+    const relayWebsocketUrl =
+      this.configService.get<string>('relayWebsocketUrl');
+    await client.init(relayWebsocketUrl, (message) =>
+      console.log(message.toString()),
+    );
+    await client.send(JSON.stringify(['EVENT', payload]));
   }
 }
 

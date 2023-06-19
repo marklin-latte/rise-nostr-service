@@ -47,6 +47,7 @@ export class RelayGateway implements OnGatewayConnection, OnGatewayDisconnect {
     event.payload = eventData;
     client.send('EVENT_ACK');
     this.logger.log(`Received event from client`);
+    await this.eventsRepository.save(event);
 
     for (const subscription of this.subscriptionClients) {
       this.logger.log(

@@ -13,8 +13,8 @@ const DEFAULT_TOPIC = 'event';
 
 @Injectable()
 export class ConsumerService implements OnModuleInit {
-  // @InjectRepository(AggregatorReceivedEvent)
-  // private eventsRepository: Repository<AggregatorReceivedEvent>;
+  @InjectRepository(AggregatorReceivedEvent)
+  private eventsRepository: Repository<AggregatorReceivedEvent>;
   @Client({
     transport: Transport.KAFKA,
     options: {
@@ -35,7 +35,7 @@ export class ConsumerService implements OnModuleInit {
   }
 
   @MessagePattern(DEFAULT_TOPIC)
-  handleMessage(message: EventDto): void {
+  async handleMessage(message: EventDto): Promise<void> {
     console.log('4');
     console.log('Received message:', message);
     const event = new AggregatorReceivedEvent();
@@ -43,6 +43,6 @@ export class ConsumerService implements OnModuleInit {
       message: message.paylod,
     };
     event.from = message.relay.url;
-    // await this.eventsRepository.save(event);
+    await this.eventsRepository.save(event);
   }
 }

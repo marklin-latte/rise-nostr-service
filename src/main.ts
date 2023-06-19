@@ -1,11 +1,18 @@
 import { NestFactory } from '@nestjs/core';
 import { WsAdapter } from '@nestjs/platform-ws';
-import { RelayModule } from './relay-service/relay.module';
+import { RelayModule } from './apps/relay-service/relay.module';
+import { EventAggregateModule } from './apps/event-aggregator/event-aggregator.module';
 
 async function bootstrap() {
-  const app = await NestFactory.create(RelayModule);
-  app.useWebSocketAdapter(new WsAdapter(app));
-  await app.listen(3000);
-  console.log(`Application is running on: ${await app.getUrl()}`);
+  const relayService = await NestFactory.create(RelayModule);
+  relayService.useWebSocketAdapter(new WsAdapter(relayService));
+  await relayService.listen(3000);
+  console.log(`Relay Service is running on: ${await relayService.getUrl()}`);
+
+  const eventAggregateService = await NestFactory.create(EventAggregateModule);
+  await eventAggregateService.listen(4000);
+  console.log(
+    `EventAggregator service is running on: ${await eventAggregateService.getUrl()}`,
+  );
 }
 bootstrap();
